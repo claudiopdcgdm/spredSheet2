@@ -119,6 +119,7 @@ def run(spredSheetId):
                             for linha in datasBaseBi[1:]  # Ignora o cabeçalho
                             if linha and linha[0].strip()
                         }
+            
             if codigoRastreio.strip().upper() in codigos_base:
                 logger.info(f"Código de rastreio {codigoRastreio} já inserido na BASE!")
 
