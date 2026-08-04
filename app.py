@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 import inbound
 import outbound
 import scheduller
+import config
 
 load_dotenv()
   
@@ -36,6 +37,8 @@ def menu():
             break
         elif option == "4":
             print('Configurações')
+            config.configuration()
+            menu()
             break
         elif option == "0":
             print("Encerrando...")

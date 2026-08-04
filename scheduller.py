@@ -15,7 +15,7 @@ def start():
     scheduler.add_job(
         func=inbound.run,
         trigger="interval",
-        minutes=int(os.getenv("TIME_UPDATE_JOB_RECEB", "5")),
+        hours=int(os.getenv("TIME_UPDATE_JOB_RECEB")),
         args=[os.getenv("SPREDSHEET_REC")],
         id="recebimento",
         replace_existing=True
@@ -25,7 +25,7 @@ def start():
     scheduler.add_job(
         func=outbound.run,
         trigger="interval",
-        minutes=int(os.getenv("TIME_UPDATE_JOB_BASE", "15")),
+        minutes=int(os.getenv("TIME_UPDATE_JOB_BASE")),
         id="devolucao",
         replace_existing=True
     )
