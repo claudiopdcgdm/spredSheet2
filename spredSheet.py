@@ -2,6 +2,7 @@ from dotenv import load_dotenv
 import gspread 
 from google.oauth2.service_account import Credentials
 import os
+from logger import logger
 load_dotenv()
 
 
@@ -12,7 +13,6 @@ SCOPES = [
 # ACESSO AS PLANILHAS DO GOOGLE
 def loadSpredSheet(spredSheet_Id):
     try:
-
         credenciais = Credentials.from_service_account_file(
             "project-reversa-e1e51cb24f7b.json",
             scopes=SCOPES
@@ -25,4 +25,5 @@ def loadSpredSheet(spredSheet_Id):
 
         return spredSheet
     except Exception as err:
-        print(err)
+        logger.info(f"Erro ao tentar conectar na planilha -> {err}")
+        return None
