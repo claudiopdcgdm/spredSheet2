@@ -85,8 +85,9 @@ def run():
                 logger.info(f"Devolução encontrada na GUIA. {client} -> {codigoRastreio}")
                 updateLine(line)
 
-                if cont >= 12:
-                    time.sleep(7)
+                if cont >= 7:
+                    time.sleep(10)
+                    cont = 0
                 else:
                     cont = cont + 1
 

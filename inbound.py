@@ -91,9 +91,9 @@ def run(spredSheetId):
             usuarioReceb = data[5]
             cliente = data[6]
 
-            nfd = None
-            dataNfd = None
-            usuarioDev = None
+            nfd = "-"
+            dataNfd = "-"
+            usuarioDev = "-"
             status = "PENDENTE"
 
             tempoProcessamento = calcProcessTime(dateInValue, currentDate)
@@ -116,7 +116,7 @@ def run(spredSheetId):
             # validar se o codigo rastreio jah existe na planilha na BASE
             codigos_base = {
                             linha[0].strip().upper()
-                            for linha in datasBaseBi[1:]  # Ignora o cabeçalho
+                            for linha in datasBaseBi
                             if linha and linha[0].strip()
                         }
             
@@ -125,8 +125,9 @@ def run(spredSheetId):
 
             else:
                 outbound.addLine(spredSheetStruct)
-                if cont >= 12:
-                    time.sleep(7)
+                if cont >= 7:
+                    time.sleep(10)
+                    cont = 0
                 else:
                     cont = cont + 1
     
