@@ -12,23 +12,21 @@ def menu():
         os.system("cls")  # Windows
         print("Developer By CPM")
         print("=" * 40)
-        print(" Menu de cofiguração")
+        print(" Automação de dados Reversa")
         print("=" * 40)
-        print("1 - Start Automation")
-        print("2 - Load SpredSheet Inbound (Recebimento)")
-        print("3 - Update SpredSheet Base_Bi_2 ")
-        print("4 - Configurations")
-        print("0 - Exit")
+        print("1 - Iniciar Automação")
+        print("2 - Executar Processo Inbound (Recebimento)")
+        print("3 - Executar Processo Outbound")
+        print("4 - Configurações")
+        print("0 - Sair")
         print("=" * 40)
 
-        option = input("Choose option: ")
+        option = input("Escolha uma opção: ")
 
         if option == "1":
-            print("Iniciando automação")
             scheduller.start()
             break
         if option == "2":
-            print('Carregar planilha recebimento')
             inbound.run(os.getenv("SPREDSHEET_REC"))
             break
         elif option == "3":
@@ -36,7 +34,6 @@ def menu():
             outbound.run()
             break
         elif option == "4":
-            print('Configurações')
             config.configuration()
             menu()
             break

@@ -40,27 +40,35 @@ def convertDate(dataHoraRecebe):
         return None
 
 def run(spredSheetId):
-    logger.info(f'Carregando dados de Recebimento')
+    logger.info("Conectando na planilha de recebimento")
 
     periodDay = int(os.getenv("DAYS_LIMIT_RECEB", "7"))
     limitDate = datetime.now().date() - timedelta(days=periodDay)
-    currentDate = datetime.now().date()
     cont = 0
     filterDatas = []
-
-    logger.info("Conectando na planilha de recebimento")
     spredSheetLoad = spredSheet.loadSpredSheet(spredSheetId)
     if spredSheetLoad is None:
         logger.info("Falha ao tentar acessar planilha de recebimento")
         return
-
+    
     sheet1 = spredSheetLoad.sheet1
     datas_sheet1 = sheet1.get_all_values()
-    logger.info("Carregando dados da planilha de Base BI")
-    datasBaseBi = outbound.loadDatasSheetBaseBi()
+    logger.info(f"Planiha {spredSheetLoad.title} carregado com sucesso!!!")
+
+    logger.info(f"Conectando na planilha Base")
+    sheetBaseBi, spredSheetBaseBi = outbound.connectInSpredSheetBi()
+    if sheetBaseBi is None:
+        logger.info(f"Falha ao tentar carregar dados da planilha {spredSheetBaseBi.title}")
+        return
+    
+    logger.info(f"Base {spredSheetBaseBi.title} -> Aba {sheetBaseBi} conectada com sucesso!!!")
+
+    logger.info(f"Carregando dados de {sheetBaseBi}")
+    datasBaseBi = outbound.loadDatasSheetBaseBi(sheetBaseBi)
     if datasBaseBi is None:
         logger.info("Falha ao tentar acessar planilha Base BI")
         return
+    logger.info(f"Dados de {sheetBaseBi} carregados com sucesso")
 
     # Filtro para pegar periodo configurado
     logger.info(f"Filtrando registros")
@@ -96,7 +104,8 @@ def run(spredSheetId):
             usuarioDev = "-"
             status = "PENDENTE"
 
-            tempoProcessamento = calcProcessTime(dateInValue, currentDate)
+            # tempoProcessamento = calcProcessTime(dateInValue, currentDate)
+            # tempoProcessamento = f"=TODAY()-B{cell.row}"
 
             spredSheetStruct = [
                 codigoRastreio,
@@ -107,29 +116,29 @@ def run(spredSheetId):
                 dataNfd,
                 usuarioDev,
                 status,
-                tempoProcessamento,
+                # tempoProcessamento,
             ]
 
-            logger.info(f"DADOS LISTA DE INFO: -> {spredSheetStruct}")
+            # logger.info(f"DADOS LISTA DE INFO: -> {spredSheetStruct}")
             
 
             # validar se o codigo rastreio jah existe na planilha na BASE
-            codigos_base = {
-                            linha[0].strip().upper()
-                            for linha in datasBaseBi
-                            if linha and linha[0].strip()
-                        }
-            
-            if codigoRastreio.strip().upper() in codigos_base:
+            codeBase = [
+                            line[0].strip().upper()
+                            for line in datasBaseBi
+                            if line and line[0].strip()
+                        ]
+
+            if codigoRastreio.strip().upper() in codeBase:
                 logger.info(f"Código de rastreio {codigoRastreio} já inserido na BASE!")
 
             else:
-                outbound.addLine(spredSheetStruct)
-                if cont >= 7:
-                    time.sleep(10)
-                    cont = 0
-                else:
-                    cont = cont + 1
+                outbound.addLine(spredSheetStruct,sheet=sheetBaseBi)
+                # if cont >= 7:
+                #     time.sleep(10)
+                #     cont = 0
+                # else:
+                #     cont = cont + 1
     
         except Exception as err:
             logger.exception(f"Erro ao processar a linha {data}: {err}")

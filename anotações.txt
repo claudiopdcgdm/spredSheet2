@@ -1,1 +1,4 @@
 pyinstaller --onefile --name Reversa --add-data ".env;." --add-data "project-reversa-e1e51cb24f7b.json;." --add-data "logs;logs" app.py 
+
+
+ ['47652330524', '05/08/2026', 'WELLA', 'MERCADO LIVRE', '-', '-', '-', 'PENDENTE', '1', '']
