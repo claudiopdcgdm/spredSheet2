@@ -1,4 +1,4 @@
-from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.schedulers.background import BackgroundScheduler
 
 from dotenv import load_dotenv
 
@@ -12,19 +12,33 @@ from logger import logger
 
 load_dotenv()
 
-scheduler = BlockingScheduler()
+
+scheduler = BackgroundScheduler()
 
 
 def start():
 
-    logger.info("Configurando Scheduler...")
+    if scheduler.running:
+
+        logger.warning(
+            "Scheduler já está em execução."
+        )
+
+        return
+
+
+    logger.info(
+        "Configurando Scheduler..."
+    )
 
 
     # ======================================================
     # RECEBIMENTO
     # ======================================================
 
-    logger.info("Rotina de Recebimento: OK")
+    logger.info(
+        "Rotina de Recebimento: OK"
+    )
 
     scheduler.add_job(
         func=inbound.run,
@@ -36,7 +50,9 @@ def start():
             )
         ),
         args=[
-            os.getenv("SPREDSHEET_REC")
+            os.getenv(
+                "SPREDSHEET_REC"
+            )
         ],
         id="recebimento",
         replace_existing=True,
@@ -49,7 +65,9 @@ def start():
     # DEVOLUÇÃO
     # ======================================================
 
-    logger.info("Rotina de Atualização: OK")
+    logger.info(
+        "Rotina de Atualização: OK"
+    )
 
     scheduler.add_job(
         func=outbound.run,
@@ -67,27 +85,35 @@ def start():
     )
 
 
-    logger.info("Scheduler iniciado...")
-
     scheduler.start()
+
+
+    logger.info(
+        "Scheduler iniciado."
+    )
 
 
 def stop():
 
-    logger.info("Solicitando parada do Scheduler...")
+    logger.info(
+        "Solicitando parada do Scheduler..."
+    )
 
-    if scheduler.running:
 
-        scheduler.shutdown(
-            wait=False
-        )
-
-        logger.info(
-            "Scheduler parado."
-        )
-
-    else:
+    if not scheduler.running:
 
         logger.info(
             "Scheduler já estava parado."
         )
+
+        return
+
+
+    scheduler.shutdown(
+        wait=False
+    )
+
+
+    logger.info(
+        "Scheduler parado."
+    )

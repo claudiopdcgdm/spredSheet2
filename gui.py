@@ -15,8 +15,8 @@ import config
 from datetime import datetime
 from logger import logger
 
-VERSION = "5.0.0"
-BUILD_DATE = "13/08/2026"
+VERSION = "5.0.1"
+BUILD_DATE = "14/08/2026"
 
 load_dotenv()
 
@@ -230,14 +230,31 @@ class Application:
 
 
                 logger.info(
-                    "Configurações salvas com sucesso. Reinicie a aplicação"
+                    "Configurações salvas com sucesso."
                 )
 
+                # Verifica se o Scheduler está rodando
+                if self.scheduler_running:
 
-                messagebox.showinfo(
-                    "Configurações",
-                    "Configurações salvas com sucesso, Reinicie a aplicação"
-                )
+                    logger.warning(
+                        "Configurações alteradas. "
+                        "É necessário reiniciar a automação."
+                    )
+
+                    messagebox.showinfo(
+                        "Configurações alteradas",
+                        "As configurações foram salvas com sucesso!\n\n"
+                        "Pare a automação e inicie novamente "
+                        "para aplicar as novas configurações."
+                    )
+
+                else:
+
+                    messagebox.showinfo(
+                        "Configurações",
+                        "Configurações salvas com sucesso!"
+                    )
+
                 window.destroy()
             except Exception:
                 logger.exception(
@@ -284,57 +301,86 @@ class Application:
             padx=10
         )
 
+    def _scheduler_stop_error(self):
+        self.btn_stop.config(
+            state="normal"
+        )
+        logger.error(
+            "Não foi possível parar o Scheduler."
+        )
 
-    # def stop_scheduler(self):
+    def _stop_scheduler_thread(self):
 
-    #     if not self.scheduler_running:
+        try:
+            scheduller.stop()
+            self.root.after(
+                0,
+                self._scheduler_stopped
+            )
+        except Exception:
+            logger.exception(
+                "Erro ao parar Scheduler."
+            )
 
-    #         logger.warning(
-    #             "Scheduler não está em execução."
-    #         )
+            self.root.after(
+                0,
+                self._scheduler_stop_error
+            )
 
-    #         return
+    def _scheduler_stopped(self):
+        self.scheduler_running = False
+        self.status_label.config(
+            text="Automação parada",
+            foreground="red"
+        )
+        self.btn_start.config(
+            state="normal"
+        )
+        self.btn_stop.config(
+            state="disabled"
+        )
+        logger.info(
+            "Automação parada com sucesso."
+        )
+       
+        self.btn_inbound.config(
+            state="normal"
+        )
+        self.btn_outbound.config(
+            state="normal"
+        )
+        self.btn_config.config(
+            state="normal"
+        )
+        self.btn_start.config(
+            state="normal"
+        )
+
+    def stop_scheduler(self):
+
+        if not self.scheduler_running:
+
+            return
 
 
-    #     logger.info(
-    #         "Solicitando parada da automação..."
-    #     )
+        self.btn_stop.config(
+            state="disabled"
+        )
 
 
-    #     try:
-
-    #         scheduller.stop()
-
-
-    #         self.scheduler_running = False
+        logger.info(
+            "Solicitando parada da automação..."
+        )
 
 
-    #         self.status_label.config(
-    #             text="Automação parada"
-    #         )
+        thread = threading.Thread(
+            target=self._stop_scheduler_thread,
+            daemon=True
+        )
 
+        thread.start()
 
-    #         self.btn_start.config(
-    #             state="normal"
-    #         )
-
-
-    #         self.btn_stop.config(
-    #             state="disabled"
-    #         )
-
-
-    #         logger.info(
-    #             "Automação parada com sucesso."
-    #         )
-
-
-    #     except Exception:
-
-    #         logger.exception(
-    #             "Erro ao parar Scheduler."
-    #         )
-        
+          
     def __init__(self, root):
 
         self.root = root
@@ -394,6 +440,7 @@ class Application:
         footer_label.pack(
             anchor="e"
         )
+
         # --------------------------------------------------
         # HEADER
         # --------------------------------------------------
@@ -486,17 +533,17 @@ class Application:
             fill="x",
             pady=5
         )
-        # self.btn_stop = ttk.Button(
-        #     frame_buttons,
-        #     text="■  Parar Automação",
-        #     command=self.stop_scheduler,
-        #     state="disabled"
-        # )
+        self.btn_stop = ttk.Button(
+            frame_buttons,
+            text="■  Parar Automação",
+            command=self.stop_scheduler,
+            state="disabled"
+        )
 
-        # self.btn_stop.pack(
-        #     fill="x",
-        #     pady=5
-        # )
+        self.btn_stop.pack(
+            fill="x",
+            pady=5
+        )
 
 
         # Inbound
@@ -621,34 +668,109 @@ class Application:
             return
 
 
-        self.scheduler_running = True
+        try:
+
+            scheduller.start()
+
+            self.scheduler_running = True
 
 
-        self.status_label.config(
-            text="Automação em execução",
-            foreground="green"
-        )
+            self.status_label.config(
+                text="Automação em execução",
+                foreground="green"
+            )
 
 
-        self.btn_start.config(
-            state="disabled"
-        )
-
-        # self.btn_stop.config(
-        #     state="normal"
-        # )
-
-        logger.info(
-            "Iniciando scheduler..."
-        )
+            self.btn_start.config(
+                state="disabled"
+            )
 
 
-        thread = threading.Thread(
-            target=self._scheduler_thread,
-            daemon=True
-        )
+            self.btn_stop.config(
+                state="normal"
+            )
 
-        thread.start()
+            
+            self.btn_start.config(
+                state="disabled"
+            )
+
+            self.btn_inbound.config(
+                state="disabled"
+            )
+
+            self.btn_outbound.config(
+                state="disabled"
+            )
+
+            self.btn_config.config(
+                state="disabled"
+            )
+           
+
+            logger.info(
+                "Automação iniciada."
+            )
+
+
+        except Exception:
+
+            logger.exception(
+                "Erro ao iniciar Scheduler."
+            )
+
+    # def start_scheduler(self):
+
+    #     if self.scheduler_running:
+
+    #         logger.warning(
+    #             "Scheduler já está em execução."
+    #         )
+
+    #         return
+
+
+    #     self.scheduler_running = True
+
+
+    #     self.status_label.config(
+    #         text="Automação em execução",
+    #         foreground="green"
+    #     )
+
+
+    #     self.btn_start.config(
+    #         state="disabled"
+    #     )
+
+    #     self.btn_inbound.config(
+    #         state="disabled"
+    #     )
+
+    #     self.btn_outbound.config(
+    #         state="disabled"
+    #     )
+
+    #     self.btn_config.config(
+    #         state="disabled"
+    #     )
+        
+
+    #     self.btn_stop.config(
+    #         state="normal"
+    #     )
+
+    #     logger.info(
+    #         "Iniciando scheduler..."
+    #     )
+
+
+    #     thread = threading.Thread(
+    #         target=self._scheduler_thread,
+    #         daemon=True
+    #     )
+
+    #     thread.start()
 
 
     def _scheduler_thread(self):
@@ -688,12 +810,12 @@ class Application:
                 )
             )
 
-            # self.root.after(
-            #     0,
-            #     lambda: self.btn_stop.config(
-            #         state="disabled"
-            #     )
-            # )
+            self.root.after(
+                0,
+                lambda: self.btn_stop.config(
+                    state="disabled"
+                )
+            )
 
 
     # ======================================================
