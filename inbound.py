@@ -2,7 +2,6 @@ import spredSheet
 import outbound
 import os
 from datetime import datetime, timedelta
-import time
 from logger import logger
 
 # Calcula tempo de processaomento em dias

@@ -193,12 +193,12 @@ def updateLine(datasDevol,sheetBaseBi):
     status = "EFETIVADO"
 
     if datasDevol:
-        trackingCode = datasDevol[0]
-        nfd = datasDevol[1]
-        dataNfd = datasDevol[2]
-        user = datasDevol[3]
+        trackingCode = datasDevol[0].strip()
+        nfd = datasDevol[1].strip()
+        dataNfd = datasDevol[2].strip()
+        user = datasDevol[3].strip()
         updateAt = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-    
+         
         # try:
         cell = retry_google_api(
             sheetBaseBi.find,
@@ -228,7 +228,7 @@ def updateLine(datasDevol,sheetBaseBi):
                 )
         else:
             logger.error(f"Erro ao tentar atualizar {trackingCode} na planilha")
-            raise Exception((f"Erro ao tentar atualizar {trackingCode} na planilha"))
+            raise Exception(f"Erro ao tentar atualizar {trackingCode} na planilha")
 
     logger.info("Planilha atualizada com sucesso!")
 
