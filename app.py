@@ -1,44 +1,41 @@
 import os
 from dotenv import load_dotenv
-from datetime import datetime
 import inbound
 import outbound
+import scheduller
+import config
 
 load_dotenv()
   
 def menu():
     while True:
         os.system("cls")  # Windows
-
+        print("Developer By CPM")
         print("=" * 40)
-        print(" Menu de cofiguração")
+        print(" Automação de dados Reversa")
         print("=" * 40)
-        print("1 - Carrega planilha de recebimento")
-        print("2 - Carrega planilha de devolucao")
-        # print("3 - Carrega planilha de devolução ")
-        # print("4 - Gravar dados na BASE_BI")
-        # print("5 - Consolidar dados ")
+        print("1 - Iniciar Automação")
+        print("2 - Executar Processo Inbound (Recebimento)")
+        print("3 - Executar Processo Outbound")
+        print("4 - Configurações")
         print("0 - Sair")
         print("=" * 40)
 
-        option = input("Choose option: ")
+        option = input("Escolha uma opção: ")
 
         if option == "1":
-            print('Load SpredSheet Inbound')
-            inbound.loadSpredSheetInbound(os.getenv("SPREDSHEET_REC"))
+            scheduller.start()
             break
         if option == "2":
-            print('Load SpeedSheet Outbound')
-            outbound.loadSpredSheetOutbound(os.getenv("SPREDSHEET_DEV"))
+            inbound.run(os.getenv("SPREDSHEET_REC"))
             break
         elif option == "3":
-            print('opção 3')
+            print('Atualizar Base')
+            outbound.run()
             break
         elif option == "4":
-            print('opção 4')
-            break
-        elif option == "5":
-            print('opção 5')
+            config.configuration()
+            menu()
             break
         elif option == "0":
             print("Encerrando...")
